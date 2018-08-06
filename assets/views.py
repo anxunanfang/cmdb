@@ -359,7 +359,12 @@ def host_del(request):
     host.env = ''
     host.number = ''
     host.switch_port = ''
-    host.idc = IDC.objects.get(name=u"报废库房")
+    idc_ = IDC.objects.filter(name=u"报废库房")
+    if idc_.exists():
+        idc_ = idc_.first()
+    else:
+        idc_ = None
+    host.idc = idc_
     host.business.clear()
     host.service.clear()
     host.save()
@@ -385,7 +390,12 @@ def host_del_batch(request):
         host.env = ''
         host.number = ''
         host.switch_port = ''
-        host.idc = IDC.objects.get(name=u'报废库房')
+        idc_ = IDC.objects.filter(name=u"报废库房")
+        if idc_.exists():
+            idc_ = idc_.first()
+        else:
+            idc_ = None
+        host.idc = idc_
         host.business.clear()
         host.service.clear()
         host.save()
@@ -452,11 +462,12 @@ def host_add_batch(request):
         for host in multi_hosts:
             if host == '':
                 break
-            number, brand, hard_info, eth1, eth2, internal_ip, idc, comment = host.split('!@')
-            hard_info = ast.literal_eval(hard_info)
-            cpu, memory, hard_disk = hard_info[0:3]
-            idc = IDC.objects.get(name=idc)
-            asset = Host(number=number, brand=brand, idc=idc, cpu=cpu,
+            print host
+            print len(host.split("@"))
+            print host.split("@")
+            node_name, cpu, memory, hard_disk, number, brand,  eth1, eth2, internal_ip, idc, comment,  = host.split('@')
+            print idc
+            asset = Host(node_name=node_name, number=number, brand=brand,  cpu=cpu,
                          memory=memory, hard_disk=hard_disk, eth1=eth1,
                          eth2=eth2, internal_ip=internal_ip, editor=comment)
             asset.save()
@@ -735,6 +746,7 @@ def host_update(request):
     host.eth1 = eth1
     host.mac = mac
     host.cpu = cpu
+    # host.raid = raid
     host.hard_disk = hard_disk
     host.memory = memory
     host.brand = brand
@@ -771,14 +783,14 @@ def zabbix_host(request):
 def ip_list(request):
     """ ip列表 """
     idcs = IDC.objects.all()
-    yizhuang_idc = get_object_or_404(IDC, name='亦庄电信')
-    active_111 = IpList.objects.filter(idc=yizhuang_idc, network='192.168.111.0/24', status=1)
-    unactive_111 = IpList.objects.filter(idc=yizhuang_idc, network='192.168.111.0/24', status=1)
-    active_112 = IpList.objects.filter(idc=yizhuang_idc, network='192.168.112.0/24', status=1)
-    unactive_112 = IpList.objects.filter(idc=yizhuang_idc, network='192.168.112.0/24', status=1)
-    active_113 = IpList.objects.filter(idc=yizhuang_idc, network='192.168.113.0/24', status=1)
-    unactive_113 = IpList.objects.filter(idc=yizhuang_idc, network='192.168.113.0/24', status=1)
-    return my_render('assets/ip_list.html', locals(), request)
+    # yizhuang_idc = get_object_or_404(IDC, name='亦庄电信')
+    # active_111 = IpList.objects.filter(idc=yizhuang_idc, network='192.168.111.0/24', status=1)
+    # unactive_111 = IpList.objects.filter(idc=yizhuang_idc, network='192.168.111.0/24', status=1)
+    # active_112 = IpList.objects.filter(idc=yizhuang_idc, network='192.168.112.0/24', status=1)
+    # unactive_112 = IpList.objects.filter(idc=yizhuang_idc, network='192.168.112.0/24', status=1)
+    # active_113 = IpList.objects.filter(idc=yizhuang_idc, network='192.168.113.0/24', status=1)
+    # unactive_113 = IpList.objects.filter(idc=yizhuang_idc, network='192.168.113.0/24', status=1)
+    return render_to_response('assets/ip_list.html', locals(), context_instance=RequestContext(request))
 
 
 @login_required
